@@ -1,0 +1,163 @@
+<html>
+<head>
+  <title>Testing Bridge</title>
+</head>
+<body>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js" type="text/javascript"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js" type="text/javascript"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.10/backbone-min.js" type="text/javascript"></script>
+  <script src="/syndicate/client.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    (function() {
+      Syndicate.connect();
+
+      var widgetsChannel = Syndicate.Channel.define({
+        resource: 'widgets',
+
+        actions: {
+          update: 'onUpdate'
+        },
+
+        onUpdate: function(message) {
+          console.log('got update', message);
+        }
+      });
+
+
+      function logMessage(action) {
+        return function(response) {
+          console.log('Received', action, arguments);
+        }
+      }
+
+      widgetsChannel.on('update', logMessage('update'));
+      widgetsChannel.on('create', logMessage('create'));
+      widgetsChannel.on('delete', logMessage('delete'));
+
+      window.channel = widgetsChannel;
+
+      // override Backbone.sync
+      Backbone.sync = function(method, model, options) {
+        console.log('sync', method, model, options);
+
+        function remoteCallback(response) {
+          if (response.headers.status !== 200) {
+            if (options.error) {
+              options.error(model, response, options);
+            }
+            model.trigger('error', model, response, options);
+          }
+          else {
+            if (options.success) {
+              options.success(model, response.objects, options);
+            }
+            model.trigger('sync', model, response.objects, options);
+          }
+        }
+
+        if (method === 'read') {
+          widgetsChannel.read(options.data, remoteCallback)
+        }
+      };
+
+
+      // when receiving incoming events update collection model instances
+      widgetsChannel.on('update', function(message) {
+        collectionInstances.forEach(function(collection) {
+          collection.each(function(model) {
+            // TODO idProperty is hardcoded here and should be in message
+            for (var i = message.objects.length - 1; i >= 0; i--) {
+              if (model.id === message.objects[i].id) {
+                model.set(message.objects[i]);
+              }
+            }
+
+          });
+        });
+      });
+
+      // override Collection so that we can globally track collection instances to update models
+      var oldInit = Backbone.Collection.prototype.initialize,
+          collectionInstances = [];
+      Backbone.Collection.prototype.initialize = function() {
+        collectionInstances.push(this);
+        oldInit.apply(this, arguments);
+      };
+    })();
+  </script>
+
+  <script type="text/javascript">
+    $(function() {
+      var Person = Backbone.Model.extend({}),
+          People = Backbone.Collection.extend({
+            model: Person
+          }),
+          PeopleListView = Backbone.View.extend({
+            initialize: function() {
+              this.listenTo(this.collection, "reset", this.render);
+              this.listenTo(this.collection, "add", this.render);
+              this.listenTo(this.collection, "remove", this.render);
+            },
+            render: function() {
+              this.$el.html('');
+              this.collection.each(function(model) {
+                this.add(model);
+              }, this);
+              return this;
+            },
+            add: function(model) {
+              var itemView = new PersonItemView({model: model});
+              this.$el.append(itemView.render().el);
+            }
+          }),
+          PersonItemView = Backbone.View.extend({
+            tagName: 'li',
+            tpl: _.template("<strong><%= name %></strong>: <span><%= email %></span>"),
+            initialize: function() {
+              this.listenTo(this.model, "change", this.render);
+            },
+            render: function() {
+              this.$el.html(this.tpl(this.model.attributes));
+              return this;
+            }
+          }),
+          SearchFieldView = Backbone.View.extend({
+            events: { 'blur': 'performSearch' },
+            performSearch: function(e) {
+              var value = this.$el.val(),
+                  name = this.$el.attr('name'),
+                  data = {};
+
+              data[name] = value;
+              this.collection.fetch({data: data});
+            }
+          }),
+          listView, searchField, people;
+
+
+      people = new People();
+      searchField = new SearchFieldView({
+        el: 'header input',
+        collection: people
+      });
+      listView = new PeopleListView({
+        el: '.people ul.list',
+        collection: people
+      });
+
+      // listView.collection.add(new listView.collection.model({name: 'foo', email: 'fiddlesticks'}))
+      window.listView = listView;
+    });
+  </script>
+</body>
+
+<main>
+  <header>
+    <input type="search" name="name" placeholder="title">
+  </header>
+  <section class="people">
+    <ul class="list"></ul>
+  </section>
+</main>
+
+</html>

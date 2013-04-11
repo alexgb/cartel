@@ -1,0 +1,10 @@
+{
+  "name": "todomvc-cartel",
+  "description": "TodoMVC todo app using Cartel",
+  "version": "0.0.1",
+  "main": "server/index.js",
+  "dependencies": {
+    "node-static": "0.6.x"
+  },
+  "private": true
+}

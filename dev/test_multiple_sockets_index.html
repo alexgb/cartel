@@ -1,0 +1,21 @@
+<html>
+<head>
+  <title></title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+    var socket1 = io.connect('http://localhost/ns1'),
+        socket2 = io.connect('http://localhost/ns2');
+
+    socket1.on('hi', function (data) {
+      console.log('socket1 got', data);
+    });
+
+    socket2.on('hi', function (data) {
+      console.log('socket2 got', data);
+    });
+  </script>
+</head>
+<body>
+
+</body>
+</html>
