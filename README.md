@@ -145,7 +145,9 @@ var postsChannel = Cartel.Channel.define({
 See the examples directory for a more complete MVCTodo based example app.
 
 ```bash
-node examples/todos/server
+cd examples/todos
+npm install
+node server
 ```
 
 ## <a id="api"></a>Channel API
