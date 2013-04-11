@@ -1,6 +1,6 @@
 {
   "author": "Alex Gibbons <alex.gibbons@gmail.com>",
-  "name": "Cartel",
+  "name": "cartel",
   "description": "A real-time bidirectional data transport between node.js and the browser.",
   "version": "0.0.1",
   "repository": {
