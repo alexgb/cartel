@@ -4,7 +4,7 @@ A real-time bidirectional data transport between node.js and the browser. Hook i
 
 Cartel is a wrapper around [Socket.IO](https://github.com/learnBoost/socket.io), and provides a data transport for objects oriented around the concept of CRUD actions. Cartel Channels can act as a simple WebSocket based replacement for Ajax requests, but also go much further by offering the ability to push data to clients and manage the process of propagating data changes to only interested clients.
 
-**Cartel is currently in proof-of-concept form and is not yet production ready.***
+__*Cartel is currently in proof-of-concept form and is not yet production ready.__
 
 ## Contents
 
