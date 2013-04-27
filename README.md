@@ -142,13 +142,9 @@ var postsChannel = Cartel.Channel.define({
 
 ## <a id="examples"></a>Examples
 
-See the examples directory for a more complete MVCTodo based example app.
-
-```bash
-cd examples/todos
-npm install
-node server
-```
+See TodoMVC Cartel w/Backbone example:
+  * [Code](https://github.com/alexgb/cartel-todos)
+  * [Demo](http://cartel-todos.nodejitsu.com/)
 
 ## <a id="api"></a>Channel API
 
